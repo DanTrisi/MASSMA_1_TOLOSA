@@ -84,11 +84,15 @@ on X: $V_c=\pi X N/1000$.
 \end{figure}
 
 \sloppy
-\paragraph{Code.} All computations are done with the Python code delivered with this
-report (Appendix~\ref{app:code}): models and signal processing in
-\texttt{machining.py}, \texttt{turning\_analysis.py} for points 1--3 and
-\texttt{drilling\_analysis.py} for point 4. Running \texttt{run\_all.py} produces every
-figure and every value shown in this report.
+\paragraph{Code.} All computations are done in Python. The code, together with the
+input data, is available at
+\begin{center}
+\url{https://github.com/DanTrisi/MASSMA_1_TOLOSA/tree/master/Assigment1}
+\end{center}
+Models and signal processing are in \texttt{machining.py}, points 1--3 in
+\texttt{turning\_analysis.py} and point 4 in \texttt{drilling\_analysis.py}. Running
+\texttt{run\_all.py} produces every figure and every value shown in this report
+(Appendix~\ref{app:code}).
 
 % ===========================================================================
 \section{Point 1 -- Prediction of the cutting power in turning}
@@ -613,8 +617,11 @@ drill & phase & cutting radii (mm) & $F_f$ (N) & $P_c$ (W) & $M_c$ (N\,m) & $P_f
 \end{itemize}
 
 \appendix
-\section{Python code: content and how to run it}\label{app:code}
-\paragraph{Delivered files.}
+\section{Python code: where to find it and how to run it}\label{app:code}
+\paragraph{Repository.} The code and the data are in the folder \texttt{Assigment1} of
+\begin{center}
+\url{https://github.com/DanTrisi/MASSMA_1_TOLOSA/tree/master/Assigment1}
+\end{center}
 \begin{lstlisting}
 run_all.py                 # runs the whole analysis (turning first, then drilling)
 src/machining.py           # models (turning, drilling), CSV reader,
@@ -622,7 +629,13 @@ src/machining.py           # models (turning, drilling), CSV reader,
 src/turning_analysis.py    # points 1-3: prediction, timings, P0, Pc, Fc, Kc
 src/drilling_analysis.py   # point 4: drilling sequence D5 + D13
 src/plotstyle.py           # common style of the figures
+data/                      # the four CSV traces of the chapter_2025 repository
+plot/                      # figures of this report, as produced by the code
+results/                   # tables of results, as produced by the code
 \end{lstlisting}
+The four CSV files in \texttt{data/} are an unmodified copy of the traces published in
+\texttt{github.com/annacarlaaraujo/chapter\_2025}. If a file is missing, the code stops
+and says which one.
 
 \paragraph{Requirements.} Python 3.10 or newer with \texttt{numpy} ($\geq 2.0$),
 \texttt{pandas} and \texttt{matplotlib}:
@@ -630,21 +643,12 @@ src/plotstyle.py           # common style of the figures
 pip install numpy pandas matplotlib
 \end{lstlisting}
 
-\paragraph{Input data.} Download the four CSV traces from
-\texttt{github.com/annacarlaaraujo/chapter\_2025} (\texttt{ANNACHPTVC150.csv},
-\texttt{ANNACHPTVC150VIDE.csv}, \texttt{ANNACHPT1200RPM.csv},
-\texttt{ANNACHPT1200RPMVIDE.csv}) and put them in a folder \texttt{data/} next to
-\texttt{run\_all.py}:
+\paragraph{Run.} Download the repository (\emph{Code} $\rightarrow$ \emph{Download ZIP}
+on GitHub, or \texttt{git clone}) and run the analysis from the \texttt{Assigment1}
+folder:
 \begin{lstlisting}
-run_all.py
-src/  ...
-data/ ANNACHPTVC150.csv  ANNACHPTVC150VIDE.csv
-      ANNACHPT1200RPM.csv  ANNACHPT1200RPMVIDE.csv
-\end{lstlisting}
-If a file is missing, the code stops and says which one.
-
-\paragraph{Run.} From the folder that contains \texttt{run\_all.py}:
-\begin{lstlisting}
+git clone https://github.com/DanTrisi/MASSMA_1_TOLOSA.git
+cd MASSMA_1_TOLOSA/Assigment1
 python run_all.py
 \end{lstlisting}
 The turning analysis must run before the drilling one, because the drilling prediction
@@ -653,8 +657,9 @@ order. The two scripts can also be run one at a time
 (\texttt{python src/turning\_analysis.py}, then \texttt{python src/drilling\_analysis.py}).
 
 \paragraph{Output.} The main results (powers, $K_c$ per pass, drilling values and
-instants) are printed in the terminal. The figures of this report are saved in
-\texttt{plot/} (PDF and PNG). The tables of results are saved in \texttt{results/},
+instants) are printed in the terminal. The figures of this report are saved (or
+overwritten) in \texttt{plot/} (PDF and PNG). The tables of results are saved in
+\texttt{results/},
 including \texttt{kc\_reference.csv}, which carries the reference $K_c$ and $V_c$
 from the turning analysis to the drilling prediction.
 
