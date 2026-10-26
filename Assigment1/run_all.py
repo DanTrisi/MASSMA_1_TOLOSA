@@ -1,4 +1,10 @@
-"""Run every analysis of Assignment 1: plots go to plot/, LaTeX numbers to report/generated/."""
+"""Run every analysis of Assignment 1 (turning first, then drilling).
+
+Input : the four GitHub CSV traces in data/
+Output: figures in plot/, numerical results in results/
+
+    python run_all.py
+"""
 import runpy
 import sys
 from pathlib import Path

@@ -22,7 +22,16 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
 PLOT_DIR = ROOT / "plot"
-TABLE_DIR = ROOT / "report" / "generated"
+TABLE_DIR = ROOT / "results"
+
+
+def check_data(*names: str) -> None:
+    """Stop with a clear message if the GitHub traces are not in data/."""
+    missing = [n for n in names if not (DATA_DIR / n).exists()]
+    if missing:
+        raise FileNotFoundError(
+            f"Missing {', '.join(missing)} in {DATA_DIR}. Download the CSV files from "
+            "https://github.com/annacarlaaraujo/chapter_2025 into that folder.")
 
 
 # ---------------------------------------------------------------------------

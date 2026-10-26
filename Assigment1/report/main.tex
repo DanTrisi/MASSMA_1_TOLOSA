@@ -19,11 +19,11 @@
 \makeatletter\newcommand{\rowsinput}[1]{\@@input #1 }\makeatother
 \sisetup{detect-all, group-separator={\,}, group-minimum-digits=5}
 \captionsetup{font=small,labelfont=bf}
-\lstset{basicstyle=\ttfamily\footnotesize, columns=fullflexible, frame=single,
+\lstset{basicstyle=\ttfamily\footnotesize, basewidth=0.5em, columns=fixed, keepspaces=true, frame=single,
         breaklines=true, keywordstyle=\color{blue!60!black}}
 
-\input{generated/turning_macros.tex}
-\input{generated/drilling_macros.tex}
+\input{../results/turning_macros.tex}
+\input{../results/drilling_macros.tex}
 
 \title{\textbf{Assignment 1 -- Cutting power and specific cutting pressure\\
 in turning, prediction of a drilling sequence}\\[4pt]
@@ -35,7 +35,7 @@ in turning, prediction of a drilling sequence}\\[4pt]
 \maketitle
 
 \begin{abstract}
-The cutting power of the two turning programs of the reference chapter (constant
+The cutting power of the two turning programs (constant
 cutting speed $V_c=\SI{150}{m/min}$ and constant spindle speed $N=\SI{1200}{rpm}$) is
 predicted with the mechanistic model $P_c=K_c f a_p V_c$, using the specific cutting
 pressure given by the chapter for the smallest diameter ($K_c=\KcChapter$~MPa). The
@@ -84,11 +84,11 @@ on X: $V_c=\pi X N/1000$.
 \end{figure}
 
 \sloppy
-\paragraph{Code.} All computations are in Python (environment managed with
-\texttt{uv}, see Appendix~\ref{app:code}): models and signal processing in
-\texttt{machining.py}, \texttt{turning\_analysis.py} for points 1--3,
-\texttt{drilling\_analysis.py} for point 4. \texttt{run\_all.py} regenerates every
-figure and every number of the tables of this report.
+\paragraph{Code.} All computations are done with the Python code delivered with this
+report (Appendix~\ref{app:code}): models and signal processing in
+\texttt{machining.py}, \texttt{turning\_analysis.py} for points 1--3 and
+\texttt{drilling\_analysis.py} for point 4. Running \texttt{run\_all.py} produces every
+figure and every value shown in this report.
 
 % ===========================================================================
 \section{Point 1 -- Prediction of the cutting power in turning}
@@ -133,10 +133,10 @@ pass & $X$ (mm) & $N$ (rpm) & $V_c$ (m/min) & $V_f$ (mm/min) & $P_{c,pred}$ (W) 
 $t_0$ (s) & $t_1$ (s) & $t_2$ (s)\\
 \midrule
 \multicolumn{9}{l}{\emph{Program I -- $V_c=150$ m/min}}\\
-\rowsinput{generated/prediction_vc150_rows.tex}
+\rowsinput{../results/prediction_vc150_rows.tex}
 \midrule
 \multicolumn{9}{l}{\emph{Program II -- $N=1200$ rpm}}\\
-\rowsinput{generated/prediction_n1200_rows.tex}
+\rowsinput{../results/prediction_n1200_rows.tex}
 \bottomrule
 \end{tabular}
 \end{table}
@@ -212,10 +212,10 @@ during the cut; SEC $=E/V_{removed}$.}
 pass & (mm) & pred. & meas. & pred. & meas. & pred. & meas. & (s) & (kJ) & (J/mm$^3$)\\
 \midrule
 \multicolumn{11}{l}{\emph{Program I -- $V_c=150$ m/min}}\\
-\rowsinput{generated/timing_vc150_rows.tex}
+\rowsinput{../results/timing_vc150_rows.tex}
 \midrule
 \multicolumn{11}{l}{\emph{Program II -- $N=1200$ rpm}}\\
-\rowsinput{generated/timing_n1200_rows.tex}
+\rowsinput{../results/timing_n1200_rows.tex}
 \bottomrule
 \end{tabular}
 \end{table}
@@ -324,7 +324,7 @@ specific cutting pressure (MPa), compared with Table~2 of the chapter.}
 \toprule
 pass & $X$ & $N$ & $V_c$ & $P_{tot}$ & $P_0$ & $P_c$ & $F_c$ & $K_c$ & $K_c$ chapter\\
 \midrule
-\rowsinput{generated/turning_vc150_rows.tex}
+\rowsinput{../results/turning_vc150_rows.tex}
 \bottomrule
 \end{tabular}
 \end{table}
@@ -338,7 +338,7 @@ row is the reference used for drilling.}
 \toprule
 pass & $X$ & $N$ & $V_c$ & $P_{tot}$ & $P_0$ & $P_c$ & $F_c$ & $K_c$ & $K_c$ chapter\\
 \midrule
-\rowsinput{generated/turning_n1200_rows.tex}
+\rowsinput{../results/turning_n1200_rows.tex}
 \bottomrule
 \end{tabular}
 \end{table}
@@ -421,10 +421,10 @@ pressure (MPa), compared with the value from the mean powers.}
 pass & (mm) & min & max & min & max & from min & from max & from min & mean & from max\\
 \midrule
 \multicolumn{11}{l}{\emph{Program I -- $V_c=150$ m/min}}\\
-\rowsinput{generated/range_vc150_rows.tex}
+\rowsinput{../results/range_vc150_rows.tex}
 \midrule
 \multicolumn{11}{l}{\emph{Program II -- $N=1200$ rpm}}\\
-\rowsinput{generated/range_n1200_rows.tex}
+\rowsinput{../results/range_n1200_rows.tex}
 \bottomrule
 \end{tabular}
 \end{table}
@@ -543,7 +543,7 @@ $K_f=\DrKf$~MPa, $V_c=\DrVc$~m/min).}
 \toprule
 drill & phase & cutting radii (mm) & $F_f$ (N) & $P_c$ (W) & $M_c$ (N\,m) & $P_f$ (W)\\
 \midrule
-\rowsinput{generated/drilling_rows.tex}
+\rowsinput{../results/drilling_rows.tex}
 \bottomrule
 \end{tabular}
 \end{table}
@@ -613,24 +613,49 @@ drill & phase & cutting radii (mm) & $F_f$ (N) & $P_c$ (W) & $M_c$ (N\,m) & $P_f
 \end{itemize}
 
 \appendix
-\section{Code}\label{app:code}
+\section{Python code: content and how to run it}\label{app:code}
+\paragraph{Delivered files.}
 \begin{lstlisting}
-Assigment1/
-  pyproject.toml, uv.lock      # uv environment (numpy, pandas, matplotlib, scipy)
-  run_all.py                   # runs everything (turning first, then drilling)
-  data/                        # GitHub traces (chapter_2025 repository)
-  src/machining.py             # models, trace reader, pass detection, steady state
-  src/turning_analysis.py      # points 1-3 (turning), exports the reference Kc
-  src/drilling_analysis.py     # point 4 (drilling sequence D5 + D13)
-  src/plotstyle.py             # common figure style
-  plot/                        # all figures (PDF + PNG)
-  report/                      # this report (+ generated/ tables and numbers)
+run_all.py                 # runs the whole analysis (turning first, then drilling)
+src/machining.py           # models (turning, drilling), CSV reader,
+                           # pass detection, steady-state mean / min / max
+src/turning_analysis.py    # points 1-3: prediction, timings, P0, Pc, Fc, Kc
+src/drilling_analysis.py   # point 4: drilling sequence D5 + D13
+src/plotstyle.py           # common style of the figures
 \end{lstlisting}
-To reproduce:
+
+\paragraph{Requirements.} Python 3.10 or newer with \texttt{numpy} ($\geq 2.0$),
+\texttt{pandas} and \texttt{matplotlib}:
 \begin{lstlisting}
-uv sync
-uv run python run_all.py
-cd report && latexmk -pdf main.tex
+pip install numpy pandas matplotlib
 \end{lstlisting}
+
+\paragraph{Input data.} Download the four CSV traces from
+\texttt{github.com/annacarlaaraujo/chapter\_2025} (\texttt{ANNACHPTVC150.csv},
+\texttt{ANNACHPTVC150VIDE.csv}, \texttt{ANNACHPT1200RPM.csv},
+\texttt{ANNACHPT1200RPMVIDE.csv}) and put them in a folder \texttt{data/} next to
+\texttt{run\_all.py}:
+\begin{lstlisting}
+run_all.py
+src/  ...
+data/ ANNACHPTVC150.csv  ANNACHPTVC150VIDE.csv
+      ANNACHPT1200RPM.csv  ANNACHPT1200RPMVIDE.csv
+\end{lstlisting}
+If a file is missing, the code stops and says which one.
+
+\paragraph{Run.} From the folder that contains \texttt{run\_all.py}:
+\begin{lstlisting}
+python run_all.py
+\end{lstlisting}
+The turning analysis must run before the drilling one, because the drilling prediction
+uses the specific cutting pressure identified in turning; \texttt{run\_all.py} keeps this
+order. The two scripts can also be run one at a time
+(\texttt{python src/turning\_analysis.py}, then \texttt{python src/drilling\_analysis.py}).
+
+\paragraph{Output.} The main results (powers, $K_c$ per pass, drilling values and
+instants) are printed in the terminal. The figures of this report are saved in
+\texttt{plot/} (PDF and PNG). The tables of results are saved in \texttt{results/},
+including \texttt{kc\_reference.csv}, which carries the reference $K_c$ and $V_c$
+from the turning analysis to the drilling prediction.
 
 \end{document}

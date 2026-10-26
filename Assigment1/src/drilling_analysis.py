@@ -11,7 +11,7 @@ Kf = 0.4 Kc (indication of the course). The machining length is taken as the
 depth of the drill tip below the part surface at the end of the feed.
 
 Run (after turning_analysis.py, which writes the reference Kc):
-    uv run python src/drilling_analysis.py
+    python src/drilling_analysis.py   (or python run_all.py)
 """
 from __future__ import annotations
 

@@ -10,7 +10,7 @@ Turning part of Assignment 1.
    and compute the specific cutting pressure Kc of every pass. The value of the
    smallest diameter of Program II is exported for the drilling prediction.
 
-Run:  uv run python src/turning_analysis.py
+Run:  python src/turning_analysis.py   (or python run_all.py)
 """
 from __future__ import annotations
 
@@ -21,8 +21,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from machining import (DATA_DIR, PLOT_DIR, TABLE_DIR, TurningProgram, find_feed_passes,
-                       kc_turning, load_trace, moving_average,
+from machining import (DATA_DIR, PLOT_DIR, TABLE_DIR, TurningProgram, check_data,
+                       find_feed_passes, kc_turning, load_trace, moving_average,
                        steady_state_mean, steady_state_range, time_at_z)
 from plotstyle import C, apply_style, mark_times, save
 
@@ -59,6 +59,7 @@ Z_HI, Z_LO = -3.0, -37.0
 def analyse_program(key: str) -> dict:
     cfg = PROGRAMS[key]
     prog: TurningProgram = cfg["prog"]
+    check_data(cfg["cut"], cfg["air"])
     cut, air = load_trace(DATA_DIR / cfg["cut"]), load_trace(DATA_DIR / cfg["air"])
     pc_pass, pa_pass = find_feed_passes(cut), find_feed_passes(air)
     assert len(pc_pass) == len(pa_pass) == len(prog.diameters), "pass detection failed"
