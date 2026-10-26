@@ -392,6 +392,73 @@ pass & $X$ & $N$ & $V_c$ & $P_{tot}$ & $P_0$ & $P_c$ & $F_c$ & $K_c$ & $K_c$ cha
   \label{fig:idle}
 \end{figure}
 
+\subsection{Minimum and maximum values}\label{sec:minmax}
+The recorded power is noisy: around each plateau it oscillates once per revolution
+(Fig.~\ref{fig:spectrum}). Besides the mean, the minimum and maximum of the power were
+therefore taken in the same steady-state window, for the cutting run and for the
+air-cutting run. To avoid that a single outlier sample sets the value, the minimum and
+maximum are the 1\,\% and 99\,\% percentiles of the samples of the window. The cutting
+power and the specific cutting pressure are then computed from the minima and from the
+maxima:
+\begin{equation}
+  P_{c}^{min} = P_{tot}^{min}-P_0^{min},\qquad P_{c}^{max} = P_{tot}^{max}-P_0^{max},\qquad
+  K_c^{min,max} = \frac{P_c^{min,max}}{f\,a_p\,V_c}.
+\end{equation}
+The minimum of the cutting run is paired with the minimum of the air-cutting run, and the
+maximum with the maximum, because the oscillation comes from the rotation and is
+present in both runs.
+
+\begin{table}[H]
+\centering\small
+\caption{Minimum and maximum steady-state powers (W) and the resulting specific cutting
+pressure (MPa), compared with the value from the mean powers.}
+\label{tab:range}
+\begin{tabular}{rr rr rr rr rrr}
+\toprule
+ & $X$ & \multicolumn{2}{c}{$P_{tot}$} & \multicolumn{2}{c}{$P_0$} &
+ \multicolumn{2}{c}{$P_c$} & \multicolumn{3}{c}{$K_c$}\\
+ \cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-11}
+pass & (mm) & min & max & min & max & from min & from max & from min & mean & from max\\
+\midrule
+\multicolumn{11}{l}{\emph{Program I -- $V_c=150$ m/min}}\\
+\rowsinput{generated/range_vc150_rows.tex}
+\midrule
+\multicolumn{11}{l}{\emph{Program II -- $N=1200$ rpm}}\\
+\rowsinput{generated/range_n1200_rows.tex}
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{turning_kc_range.pdf}
+  \caption{Specific cutting pressure from the mean, minimum and maximum powers.}
+  \label{fig:kcrange}
+\end{figure}
+
+\begin{itemize}
+  \item Within a pass the power swings by about \SwingCut~W with cutting and
+        \SwingAir~W without cutting, i.e.\ by the same amount. The oscillation is not
+        produced by the cut but by the rotating assembly, and it is simply added to the
+        cutting power.
+  \item For this reason $P_c$ from the minima and $P_c$ from the maxima stay close to
+        $P_c$ from the means. All the $K_c$ values fall between \KcRangeMin\ and
+        \KcRangeMax~MPa, at most \DevMinMax\,\% from the value obtained from the means.
+        The band is at most \BandOne~MPa wide in Program~I and \BandTwo~MPa in
+        Program~II. In both cases it is wider than the change of $K_c$ from one pass to
+        the next.
+  \item On the reference pass ($X=24$~mm, $N=1200$~rpm), $K_c$ is \KcRefMin~MPa from
+        the minima, \KcRef~MPa from the means and \KcRefMax~MPa from the maxima.
+  \item Pairing the values the other way round ($P_{tot}^{min}-P_0^{max}$ and
+        $P_{tot}^{max}-P_0^{min}$) would give, on the same pass, $K_c$ between
+        \KcCrossLo\ and \KcCrossHi~MPa. This range has no physical meaning: it only
+        adds up the two oscillations, which happen together.
+  \item The minimum and maximum come from a few samples at the extremes of the
+        oscillation, while the mean uses all the samples of the window. The mean is
+        therefore the most robust estimate, and it is the value used for the drilling
+        prediction.
+\end{itemize}
+
 % ===========================================================================
 \section{Point 4 -- Prediction of the drilling sequence}
 % ===========================================================================
@@ -535,7 +602,10 @@ drill & phase & cutting radii (mm) & $F_f$ (N) & $P_c$ (W) & $M_c$ (N\,m) & $P_f
   \item The Python code separates the steady-state cutting power from the spindle power
         without cutting and finds $K_c$ for every pass within \KcDevMax\,\% of the
         chapter. On the smallest diameter at constant spindle speed,
-        $K_c=\KcRef$~MPa at $V_c=\VcRef$~m/min.
+        $K_c=\KcRef$~MPa at $V_c=\VcRef$~m/min. Computed from the minimum and maximum
+        powers instead of the means, $K_c$ stays between \KcRangeMin\ and
+        \KcRangeMax~MPa, because the power oscillation is the same with and without
+        cutting.
   \item Drilling sequence: the $\varnothing$5 pre-drilling needs about 1.2~kW, 643~N and
         2.0~N\,m. The $\varnothing$13 drilling needs 2.7~kW and 1.0~kN while it enlarges
         the pilot hole, then steps up to 3.1~kW, 1.7~kN and 13.6~N\,m when the tip

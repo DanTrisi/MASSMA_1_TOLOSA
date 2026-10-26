@@ -255,3 +255,13 @@ def steady_state_mean(df: pd.DataFrame, i_start: int, i_end: int,
     m = (seg["prog_pos_z"] <= z_hi) & (seg["prog_pos_z"] >= z_lo)
     p = seg.loc[m, "power"]
     return float(p.mean()), float(p.std())
+
+
+def steady_state_range(df: pd.DataFrame, i_start: int, i_end: int,
+                       z_hi: float, z_lo: float, q: float = 1.0) -> tuple[float, float]:
+    """Minimum and maximum of the power while z_lo <= Z <= z_hi, taken as the
+    q-th and (100-q)-th percentiles so that a single outlier sample is ignored."""
+    seg = df.iloc[int(i_start):int(i_end)]
+    m = (seg["prog_pos_z"] <= z_hi) & (seg["prog_pos_z"] >= z_lo)
+    p = seg.loc[m, "power"].to_numpy()
+    return float(np.percentile(p, q)), float(np.percentile(p, 100 - q))

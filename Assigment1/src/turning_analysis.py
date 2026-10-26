@@ -23,7 +23,7 @@ import pandas as pd
 
 from machining import (DATA_DIR, PLOT_DIR, TABLE_DIR, TurningProgram, find_feed_passes,
                        kc_turning, load_trace, moving_average,
-                       steady_state_mean, time_at_z)
+                       steady_state_mean, steady_state_range, time_at_z)
 from plotstyle import C, apply_style, mark_times, save
 
 # --------------------------------------------------------------------------
@@ -72,6 +72,9 @@ def analyse_program(key: str) -> dict:
         p_tot, s_tot = steady_state_mean(cut, pc.i_start, pc.i_end, Z_HI, Z_LO)
         p_air, s_air = steady_state_mean(air, pa.i_start, pa.i_end, Z_HI, Z_LO)
         p_cut = p_tot - p_air
+        # minimum / maximum of the noisy signal (1 % and 99 % percentiles)
+        tot_min, tot_max = steady_state_range(cut, pc.i_start, pc.i_end, Z_HI, Z_LO)
+        air_min, air_max = steady_state_range(air, pa.i_start, pa.i_end, Z_HI, Z_LO)
         # program timings, read on the measured position signal
         t_feed = pc.t_start
         t0 = time_at_z(cut, pc.i_start, pc.i_end, prog.z_contact)
@@ -97,6 +100,15 @@ def analyse_program(key: str) -> dict:
             "P_total": p_tot, "P_total_std": s_tot, "P_air": p_air, "P_air_std": s_air,
             "Pc_meas": p_cut, "Pc_pred": pr.Pc_pred,
             "Kc": float(kc_turning(p_cut, F, AP, pr.Vc)),
+            "P_total_min": tot_min, "P_total_max": tot_max,
+            "P_air_min": air_min, "P_air_max": air_max,
+            # minimum with minimum, maximum with maximum (the ripple is common to both runs)
+            "Pc_min": tot_min - air_min, "Pc_max": tot_max - air_max,
+            "Kc_min": float(kc_turning(tot_min - air_min, F, AP, pr.Vc)),
+            "Kc_max": float(kc_turning(tot_max - air_max, F, AP, pr.Vc)),
+            # crossed pairing (worst case), for comparison only
+            "Kc_cross_lo": float(kc_turning(tot_min - air_max, F, AP, pr.Vc)),
+            "Kc_cross_hi": float(kc_turning(tot_max - air_min, F, AP, pr.Vc)),
             "Fc": p_cut / (pr.Vc / 60.0),
             "MRR": pr.MRR,
         })
@@ -273,6 +285,30 @@ def plot_kc(outs: dict) -> None:
     save(fig, "turning_kc")
 
 
+def plot_kc_range(outs: dict) -> None:
+    """Kc of every pass from the mean powers, with the band obtained from the
+    minimum and maximum of the noisy power signals."""
+    fig, axes = plt.subplots(1, 2, figsize=(10, 3.6), sharey=True)
+    for ax, out, col, mk in zip(axes, outs.values(), [C["p1"], C["p2"]], ["o", "s"]):
+        res = out["res"]
+        lo = np.minimum(res.Kc_min, res.Kc_max)
+        hi = np.maximum(res.Kc_min, res.Kc_max)
+        ax.fill_between(res.X, lo, hi, color=col, alpha=0.18, lw=0,
+                        label="band between the two")
+        ax.plot(res.X, res.Kc_min, color=col, lw=1.0, ls="--", marker="v", ms=4,
+                label=r"$K_c$ from minimum powers")
+        ax.plot(res.X, res.Kc_max, color=col, lw=1.0, ls=":", marker="^", ms=4,
+                label=r"$K_c$ from maximum powers")
+        ax.plot(res.X, res.Kc, color=col, marker=mk, label=r"$K_c$ from mean powers")
+        ax.set_ylim(2700, 3450)
+        ax.set_xlabel("Programmed diameter X (mm)")
+        ax.set_title(out["prog"].label)
+        ax.invert_xaxis()
+        ax.legend(loc="upper left")
+    axes[0].set_ylabel(r"$K_c$ (MPa)")
+    save(fig, "turning_kc_range")
+
+
 def plot_idle_power(outs: dict) -> tuple[np.ndarray, float]:
     r1, r2 = outs["vc150"]["res"], outs["n1200"]["res"]
     coef = np.polyfit(r1.N, r1.P_air, 2)
@@ -370,6 +406,11 @@ def write_tables(outs: dict, idle_coef: np.ndarray, idle_fit_1200: float) -> Non
                  f"{r.t2_pred - r.t_feed:.2f} \\\\"
                  for _, r in res.iterrows()]
         (TABLE_DIR / f"prediction_{key}_rows.tex").write_text("\n".join(lines) + "\n")
+        lines = [f"{r['pass']:.0f} & {r.X:.0f} & {r.P_total_min:.0f} & {r.P_total_max:.0f} & "
+                 f"{r.P_air_min:.0f} & {r.P_air_max:.0f} & {r.Pc_min:.0f} & {r.Pc_max:.0f} & "
+                 f"{r.Kc_min:.0f} & {r.Kc:.0f} & {r.Kc_max:.0f} \\\\"
+                 for _, r in res.iterrows()]
+        (TABLE_DIR / f"range_{key}_rows.tex").write_text("\n".join(lines) + "\n")
         res.to_csv(TABLE_DIR / f"turning_{key}_results.csv", index=False)
 
     # reference for the drilling prediction: smallest diameter, constant spindle speed
@@ -394,6 +435,15 @@ def write_tables(outs: dict, idle_coef: np.ndarray, idle_fit_1200: float) -> Non
         "KcTwoMean": f"{r2.Kc.mean():.0f}", "KcTwoStd": f"{r2.Kc.std():.0f}",
         "KcTwoMin": f"{r2.Kc.min():.0f}", "KcTwoMax": f"{r2.Kc.max():.0f}",
         "KcAllMean": f"{allkc.mean():.0f}",
+        "KcRefMin": f"{ref.Kc_min:.0f}", "KcRefMax": f"{ref.Kc_max:.0f}",
+        "KcRangeMin": f"{pd.concat([r1.Kc_min, r1.Kc_max, r2.Kc_min, r2.Kc_max]).min():.0f}",
+        "KcRangeMax": f"{pd.concat([r1.Kc_min, r1.Kc_max, r2.Kc_min, r2.Kc_max]).max():.0f}",
+        "BandOne": f"{(r1.Kc_max - r1.Kc_min).abs().max():.0f}",
+        "BandTwo": f"{(r2.Kc_max - r2.Kc_min).abs().max():.0f}",
+        "DevMinMax": f"{100 * pd.concat([(r.Kc_min - r.Kc).abs() / r.Kc for r in (r1, r2)] + [(r.Kc_max - r.Kc).abs() / r.Kc for r in (r1, r2)]).max():.1f}",
+        "KcCrossLo": f"{ref.Kc_cross_lo:.0f}", "KcCrossHi": f"{ref.Kc_cross_hi:.0f}",
+        "SwingCut": f"{pd.concat([r1.P_total_max - r1.P_total_min, r2.P_total_max - r2.P_total_min]).mean():.0f}",
+        "SwingAir": f"{pd.concat([r1.P_air_max - r1.P_air_min, r2.P_air_max - r2.P_air_min]).mean():.0f}",
         "PcOneMean": f"{r1.Pc_meas.mean():.0f}", "PcOnePred": f"{r1.Pc_pred.mean():.0f}",
         "PcTwoFirst": f"{r2.Pc_meas.iloc[0]:.0f}", "PcTwoLast": f"{r2.Pc_meas.iloc[-1]:.0f}",
         "PzeroOneFirst": f"{r1.P_air.iloc[0]:.0f}", "PzeroOneLast": f"{r1.P_air.iloc[-1]:.0f}",
@@ -433,6 +483,7 @@ def main() -> None:
     plot_entry_exit(outs)
     plot_steady_state(outs)
     plot_kc(outs)
+    plot_kc_range(outs)
     coef, fit1200 = plot_idle_power(outs)
     plot_timing(outs)
     print("ripple frequency (Hz):", plot_ripple(outs))
