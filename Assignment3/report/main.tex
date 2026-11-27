@@ -29,16 +29,19 @@
 \maketitle
 
 \begin{abstract}
-In the tutorial, the stability of a finish milling operation on a thin 6061-T6 wall is
-predicted with the analytical model of Altintas \& Budak and with the numerical
-semi-discretization method. The analytical model gives an unconditional limit of
-\SI{4.53}{mm}; the numerical model confirms the Hopf lobes but shows a flip lobe, caused by
-the interrupted cut, at a tooth pass frequency equal to twice the natural frequency, with a
-limit of only \SI{2.4}{mm}. With a helix angle of \SI{45}{\degree} the flip lobe becomes
-an island repeated every axial pitch. In the project, the free length of a
-$\varnothing$\SI{12}{mm} carbide end mill is reduced from \SI{46}{mm} to the minimum value
-$L_c=\SI{30}{mm}$: the stiffness increases and, for an axial depth of cut of \SI{15}{mm},
-the spindle speed $N=\SI{5910}{rpm}$ is stable while $N=\SI{5753}{rpm}$ is unstable.
+This report studies regenerative chatter in milling with stability lobes, first on a
+tutorial case and then on a slot milling project.
+In the tutorial (finish milling of a thin 6061-T6 wall), the analytical model of
+Altintas \& Budak gives an unconditional limit of \SI{4.53}{mm}. The numerical
+semi-discretization method confirms the Hopf lobes but shows a flip lobe, caused by the
+interrupted cut, at a tooth pass frequency equal to twice the natural frequency, with a
+limit of only \SI{2.4}{mm}; with a helix angle of \SI{45}{\degree} it becomes an island
+repeated every axial pitch.
+In the project, a $\varnothing$\SI{12}{mm} carbide end mill is modelled as a cantilever
+cylinder and its free length is reduced step by step from \SI{46}{mm} to the minimum value
+$L_c=\SI{30}{mm}$, checking the analytical lobes at each step. The stiffness increases and,
+for an axial depth of cut of \SI{15}{mm}, the spindle speed $N=\SI{5910}{rpm}$
+($V_c=\SI{223}{m/min}$) is stable while $N=\SI{5753}{rpm}$ is unstable.
 \end{abstract}
 
 % ===========================================================================
@@ -60,7 +63,7 @@ Tool & $D=\SI{20}{mm}$, $Z=3$, $\eta=\SI{45}{\degree}$ & $R=\SI{10}{mm}$ \\
 First mode of the wall & $\omega_1=\SI{1068.1}{rad/s}$, $m_1=\SI{2.63}{kg}$, $\xi=\SI{4}{\percent}$ &
 $f_1=\omega_1/2\pi=\SI{170.0}{Hz}$, $k=m_1\omega_1^2=\SI{3.00e6}{N/m}$ \\
 Cutting law & $K_t=\SI{550}{MPa}$, $K_r=\SI{150}{MPa}$ & $k_r=K_r/K_t=0.273$ \\
-Engagement (down milling) & $A_e=\SI{1}{mm}$, $A_e/D=0.05$ & $\varphi_{st}=\SI{154.2}{\degree}$, $\varphi_{ex}=\SI{180}{\degree}$ \\
+Engagement & down milling, $A_e=\SI{1}{mm}$, $A_e/D=0.05$ & $\varphi_{st}=\SI{154.2}{\degree}$, $\varphi_{ex}=\SI{180}{\degree}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -129,13 +132,13 @@ order $m$; the stability limit is the lower envelope of all the lobes
   \item \textbf{Unconditional limit of stability: $A_{p,lim}=\SI{4.53}{mm}$}, reached for
         a chatter frequency $f_c\approx\SI{176.7}{Hz}$. Below this depth the cut is stable
         at any spindle speed.
-  \item \textbf{Optimal spindle speeds}: the peaks of the lobes, at \SI{3469}{rpm}
-        ($m=0$, more than \SI{30}{mm}), \SI{1739}{rpm} ($m=1$, \SI{19.4}{mm}) and
-        \SI{1161}{rpm} ($m=2$, \SI{13.6}{mm}). They are about \SI{2}{\percent} above the
-        preferred speeds of question 3.2 because of the damping.
-  \item For example, for $A_p=\SI{9}{mm}$ (twice the unconditional limit) the stable
-        ranges are 1081--1176, 1499--1790, \textbf{2440--3737} and $>6556$~rpm. The most
-        productive range is the one around the main lobe ($m=0$), near \SI{3400}{rpm}.
+  \item \textbf{Optimal spindle speed ranges}: the speeds around the peaks of the lobes,
+        where the limit is much higher than the unconditional limit. The peaks are at
+        \SI{3469}{rpm} ($m=0$, more than \SI{30}{mm}), \SI{1739}{rpm} ($m=1$, \SI{19.4}{mm})
+        and \SI{1161}{rpm} ($m=2$, \SI{13.6}{mm}). They are about \SI{2}{\percent} above the
+        preferred speeds of question 3.2 because of the damping. The best range is the one
+        around the main lobe ($m=0$), near \SI{3400}{rpm}; above about \SI{6500}{rpm} the
+        limit also increases again.
 \end{itemize}
 
 \section{Numerical stability lobes}
@@ -144,6 +147,8 @@ order $m$; the stability limit is the lower envelope of all the lobes
 The script \texttt{numerical\_lobes.py} (semi-discretization, Insperger \& St\'ep\'an) was
 run with the tutorial data, down milling (\texttt{fist} $=\arccos(2A_e/D-1)$,
 \texttt{fiex} $=\pi$), $\eta=0$, \numrange{1000}{10000}~rpm and \numrange{0}{30}~mm.
+The modelling parameters entered are: $Z=3$, $D=\SI{20}{mm}$, $K_t=\SI{550}{MPa}$,
+$k_r=0.273$, $f_1=\SI{170.0}{Hz}$, $\xi=0.04$, $k=\SI{3.00e6}{N/m}$ and $A_e/D=0.05$.
 Before running it, three corrections were made:
 \begin{itemize}
   \item \texttt{MC = inv(C)@C} replaced by \texttt{MC = inv(M)@C} (typing mistake, the
@@ -151,7 +156,7 @@ Before running it, three corrections were made:
   \item the $1\times1$ arrays are used as scalars in \texttt{A[1,0]} and \texttt{B[1,0]}
         (error with numpy 2.x);
   \item the tooth angle is taken modulo $2\pi$ before testing if the tooth is cutting, as
-        in the definition of $g_j(t,z)$ (with the helix, the angle of the upper part of the tooth can become negative).
+        in the definition of $g_j(t,z)$ (with the helix, the angle can become negative).
 \end{itemize}
 
 \begin{figure}[H]
@@ -221,8 +226,7 @@ back: this explains the islands, repeated with a period close to $p$ in depth.
         $2f_1$ (\numrange{6800}{8800}~rpm).
   \item In production, the analytical approach is fast and enough for roughing with
         multi-teeth tools and for a first choice of the spindle speed. For finishing with low
-        radial immersion, the numerical approach should be used (about \SI{10}{s} of
-        computation here). In both cases the result depends on the identification of the
+        radial immersion, the numerical approach should be used. In both cases the result depends on the identification of the
         dynamic parameters ($f_1$, $k$, $\xi$) and of the cutting coefficients.
 \end{itemize}
 
@@ -260,17 +264,14 @@ I=\frac{\pi D^4}{64},\qquad k=\frac{3EI}{l^3},\qquad m=\rho\,\frac{\pi D^2}{4}\,
 For example, for $l=\SI{30}{mm}$: $I=\SI{1018}{mm^4}$, $k=\SI{6.79e7}{N/m}$,
 $m=\SI{49.2}{g}$, $\omega_n=\SI{37140}{rad/s}$ ($f_1=\SI{5911}{Hz}$), $c=\SI{36.5}{Ns/m}$.
 
-Since $k\propto 1/l^3$ and $m\propto l$, the natural frequency increases as $1/l^2$ and the
-unconditional limit of stability (proportional to $k$) as $1/l^3$: reducing the free length
-is the most efficient way to make the cut stable.
+A shorter free length gives a stiffer tool, because $k$ depends on $1/l^3$.
 
 \section{Iterations on the free tool length}
 The iteration starts with a long overhang, $l=\SI{46}{mm}$ (\SI{30}{mm} of shank clamped),
 and the free length is reduced by \SI{4}{mm} at each step until the minimum value
-$l=L_c=\SI{30}{mm}$. With natural frequencies of several kHz, the tooth pass frequency at
-\SI{6000}{rpm} ($\SI{300}{Hz}$) is about 20 times lower than $f_1$: the speed range
-contains only lobes of high order ($m\geq 7$ near \SI{6000}{rpm}, and higher at lower speeds). The Excel file computes only the
-orders 0 to 4, which here are above \SI{20000}{rpm}; the same formulas were therefore
+$l=L_c=\SI{30}{mm}$. The natural frequency of the tool is several kHz, so below
+\SI{6000}{rpm} there are only lobes of high order ($m\geq 7$). The Excel file computes only
+the orders 0 to 4, which here are above \SI{20000}{rpm}; the same formulas were therefore
 computed in Python for all the orders below \SI{6000}{rpm}.
 
 \begin{table}[H]
@@ -299,15 +300,13 @@ $l$ [mm] & $k$ [N/mm] & $m$ [g] & $f_1$ [Hz] & $A_{p,lim}$ [mm] & $A_{p,max}$ [m
 \begin{itemize}
   \item $l=46$ and \SI{42}{mm}: the stability limit stays below \SI{15}{mm} in the whole
         speed range, so there is no stable spindle speed. The free length is reduced.
-  \item $l=\SI{38}{mm}$: the first stable speeds appear, but only in two very narrow ranges
-        (5296--5298 and 5687--5708~rpm). The condition is formally respected, but a small
-        error on the dynamic parameters or on the spindle speed would make the cut unstable.
-  \item $l=\SI{34}{mm}$: eight stable ranges, still narrow (about 2 to \SI{80}{rpm} wide).
-  \item $l=L_c=\SI{30}{mm}$: the stiffness is the highest possible
-        ($k=\SI{67858}{N/mm}$, 3.6 times the value at \SI{46}{mm}) and
-        \SI{28}{\percent} of the speed range is stable at \SI{15}{mm}. As the unconditional
-        limit (\SI{12.2}{mm}) is still lower than \SI{15}{mm}, unstable speeds also exist.
-        This free length is kept.
+  \item $l=38$ and \SI{34}{mm}: some stable speeds appear and the check is already
+        satisfied. As the aim is to increase the stiffness, the free length is still reduced,
+        down to its minimum value.
+  \item $l=L_c=\SI{30}{mm}$: the stiffness is the highest possible ($k=\SI{67858}{N/mm}$).
+        The limit reaches \SI{24.1}{mm} in the speed range, so stable speeds exist; the
+        unconditional limit (\SI{12.2}{mm}) is lower than \SI{15}{mm}, so unstable speeds
+        also exist. This free length is kept.
 \end{itemize}
 
 \section{Selected cutting conditions}
@@ -320,8 +319,9 @@ $l$ [mm] & $k$ [N/mm] & $m$ [g] & $f_1$ [Hz] & $A_{p,lim}$ [mm] & $A_{p,max}$ [m
   \label{fig:final}
 \end{figure}
 
-The stable range closest to the maximum spindle speed is chosen, to have the highest cutting
-speed. The stable speed is taken in the middle of this range, to keep a margin on both sides.
+The stable speed is chosen in the stable range closest to the maximum spindle speed, to
+have the highest cutting speed. The unstable speed is taken at the bottom of the lobe just
+below.
 
 \begin{table}[H]
 \centering
@@ -330,24 +330,21 @@ speed. The stable speed is taken in the middle of this range, to keep a margin o
 \toprule
  & $N$ [rpm] & $V_c$ [m/min] & Stability limit [mm] & Result \\
 \midrule
-Stable & 5910 & 223 & 20.5 & stable (range 5835--5986~rpm) \\
+Stable & 5910 & 223 & 20.5 & stable \\
 Unstable & 5753 & 217 & 12.2 & chatter \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Both speeds respect $N\leq\SI{6000}{rpm}$ and $V_c\leq\SI{226}{m/min}$. At
-\SI{5910}{rpm} the tooth pass frequency is \SI{295.5}{Hz}, i.e.\ close to $f_1/20$: the
-stable speed is on the peak of lobe $m=19$. Only \SI{157}{rpm} lower, at the bottom of the
-next lobe, the limit falls to the unconditional value \SI{12.2}{mm} and the same depth of cut
-gives chatter.
+Both speeds respect $N\leq\SI{6000}{rpm}$ and $V_c\leq\SI{226}{m/min}$. At \SI{5910}{rpm}
+the stability limit (\SI{20.5}{mm}) is higher than \SI{15}{mm}, so the cut is stable; at
+\SI{5753}{rpm} it is lower (\SI{12.2}{mm}), so the same depth of cut gives chatter.
 
 \section{Conclusion}
-For the slot milling operation, the tool is the flexible element. Its stiffness depends on
-the free length as $1/l^3$, so the free length was reduced to its minimum value
+For the slot milling operation, the tool is the flexible element. Its stiffness increases
+when the free length decreases, so the free length was reduced to its minimum value
 $l=L_c=\SI{30}{mm}$. With this length, a slot of \SI{15}{mm} depth can be machined without
-chatter at \SI{5910}{rpm} ($V_c=\SI{223}{m/min}$), while \SI{5753}{rpm} is unstable. The
-stable ranges are narrow (about \SI{150}{rpm}), so the spindle speed must be chosen with the
-lobes; a depth of cut below \SI{12.2}{mm} would be stable at any speed.
+chatter at \SI{5910}{rpm} ($V_c=\SI{223}{m/min}$), while \SI{5753}{rpm} is unstable. A depth
+of cut below \SI{12.2}{mm} would be stable at any speed.
 
 \end{document}
