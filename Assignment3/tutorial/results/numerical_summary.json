@@ -1,0 +1,20 @@
+{
+  "helix0_down": {
+    "numerical_min_Ap_mm": 2.414592499401507,
+    "numerical_min_Ap_at_rpm": 7075.0,
+    "hopf_min_Ap_mm": 4.854009115561706,
+    "hopf_min_at_rpm": 4525.0,
+    "flip_min_Ap_mm": 2.414592499401507,
+    "flip_min_at_rpm": 7075.0
+  },
+  "helix45_down": {
+    "numerical_min_Ap_mm": 2.4792702222910026,
+    "numerical_min_Ap_at_rpm": 7075.0,
+    "hopf_min_Ap_mm": 4.930035354541515,
+    "hopf_min_at_rpm": 4525.0,
+    "flip_min_Ap_mm": 2.4792702222910026,
+    "flip_min_at_rpm": 7075.0
+  },
+  "N_ratio2_rpm": 6799.735788658135,
+  "helix_pitch_mm": 20.94395102393196
+}
